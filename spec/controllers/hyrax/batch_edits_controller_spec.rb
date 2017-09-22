@@ -73,4 +73,33 @@ RSpec.describe Hyrax::BatchEditsController, type: :controller do
       expect(GenericWork.find(two.id).visibility).to eq "authenticated"
     end
   end
+
+  describe "#destroy_collection" do
+    let(:user) { create(:user) }
+
+    let(:collection1) do
+      create(:public_collection, title: ["My First Collection"],
+                                 description: ["My incredibly detailed description of the collection"],
+                                 user: user)
+    end
+
+    let(:collection2) do
+      create(:public_collection, title: ["My Other Collection"],
+                                 description: ["My incredibly detailed description of the other collection"],
+                                 user: user)
+    end
+
+    let!(:work1) { create(:work, title: ["First of the Assets"], member_of_collections: [collection1], user: user) }
+    let(:work2)  { create(:work, title: ["Second of the Assets"], user: user) }
+
+    let(:mycontroller) { "hyrax/my/works" }
+    let(:curation_concern) { create(:work1, user: user) }
+
+    it "removes collections without works in it" do
+      controller.batch = [collection1.id, collection2.id]
+      delete :destroy_collection, params: { update_type: "delete_all" }
+      expect { Collection.find(collection1.id) }.to raise_error(Ldp::Gone)
+      expect { Collection.find(collection2.id) }.to raise_error(Ldp::Gone)
+    end
+  end
 end
