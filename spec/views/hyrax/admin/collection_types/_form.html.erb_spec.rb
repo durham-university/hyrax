@@ -4,6 +4,8 @@ RSpec.describe 'hyrax/admin/collection_types/_form.html.erb', type: :view do
 
   before do
     assign(:form, form)
+    @collection_type = instance_double(Hyrax::CollectionType,
+                                       machine_id: "type_does_not_matter")
   end
 
   it "has 3 tabs" do
